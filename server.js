@@ -95,6 +95,10 @@ io.on("connection", (socket) => {
 });
 
 const PORT = 3000;
+app.get("/", (req, res) => {
+  res.sendFile(__dirname + "/public/client.html");
+});
+
 server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
