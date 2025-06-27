@@ -449,6 +449,10 @@
 
         socket = io(backendURL);
 
+        socket.on("server_log", (msg) => {
+          console.log(`[SERVER] ${msg}`);
+        });
+
         socket.on("connect", () => {
           connected = true;
           updateConnectionStatus("Connected", true);
@@ -456,7 +460,6 @@
           loadChatHistory();
           enableInput();
 
-          // 🔁 Delay status check slightly (200ms)
           setTimeout(() => {
             socket.emit("check_user_status", toUser);
           }, 200);
