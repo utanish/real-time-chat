@@ -8,6 +8,7 @@
       href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap"
       rel="stylesheet"
     />
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <style>
       * {
         margin: 0;
@@ -85,20 +86,8 @@
         border: 1px solid #333;
         color: #fff;
         padding: 10px 12px;
-        font-family: inherit;
         font-size: 14px;
         border-radius: 4px;
-        min-width: 0;
-        width: 100%;
-      }
-
-      .connection-panel input:focus {
-        outline: none;
-        border-color: #444;
-      }
-
-      .connection-panel input::placeholder {
-        color: #666;
       }
 
       .connect-btn {
@@ -106,15 +95,11 @@
         border: 1px solid #333;
         color: #fff;
         padding: 10px 12px;
-        cursor: pointer;
-        font-family: inherit;
         font-size: 13px;
         border-radius: 4px;
-        font-weight: 500;
-        transition: background-color 0.2s ease;
-        white-space: nowrap;
         height: 42px;
         min-width: 80px;
+        cursor: pointer;
       }
 
       .connect-btn:hover {
@@ -145,19 +130,6 @@
         gap: 16px;
       }
 
-      .chat-container::-webkit-scrollbar {
-        width: 4px;
-      }
-
-      .chat-container::-webkit-scrollbar-track {
-        background: #111;
-      }
-
-      .chat-container::-webkit-scrollbar-thumb {
-        background: #333;
-        border-radius: 2px;
-      }
-
       .message-group {
         display: flex;
         flex-direction: column;
@@ -175,19 +147,16 @@
         max-width: 75%;
         padding: 12px 16px;
         border-radius: 18px;
-        position: relative;
         word-wrap: break-word;
       }
 
       .message-group.sent .message-bubble {
         background: #222;
-        color: #fff;
         border-bottom-right-radius: 4px;
       }
 
       .message-group.received .message-bubble {
         background: #1a1a1a;
-        color: #e5e5e5;
         border-bottom-left-radius: 4px;
       }
 
@@ -208,43 +177,10 @@
         justify-content: flex-start;
       }
 
-      .message-time {
-        color: #555;
-      }
-
       .message-status {
         display: flex;
         align-items: center;
         gap: 2px;
-      }
-
-      .status-icon {
-        font-size: 12px;
-      }
-
-      .status-sending {
-        color: #666;
-      }
-
-      .status-sent {
-        color: #888;
-      }
-
-      .status-delivered {
-        color: #4ade80;
-      }
-
-      .status-seen {
-        color: #3b82f6;
-      }
-
-      .empty-state {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #555;
-        font-size: 14px;
       }
 
       .input-panel {
@@ -265,7 +201,6 @@
         border: 1px solid #333;
         color: #fff;
         padding: 12px 16px;
-        font-family: inherit;
         font-size: 14px;
         border-radius: 4px;
         resize: none;
@@ -273,36 +208,16 @@
         max-height: 120px;
       }
 
-      .message-input:focus {
-        outline: none;
-        border-color: #444;
-      }
-
-      .message-input::placeholder {
-        color: #666;
-      }
-
       .send-btn {
         background: #1a1a1a;
         border: 1px solid #333;
         color: #fff;
         padding: 12px 20px;
-        cursor: pointer;
-        font-family: inherit;
         font-size: 14px;
         border-radius: 4px;
         font-weight: 500;
+        cursor: pointer;
         min-width: 60px;
-        transition: background-color 0.2s ease;
-      }
-
-      .send-btn:hover:not(:disabled) {
-        background: #333;
-      }
-
-      .send-btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
       }
 
       .footer {
@@ -318,42 +233,12 @@
         color: #ccc;
         text-decoration: none;
         margin: 0 10px;
-        transition: color 0.2s ease;
       }
 
       .footer a:hover {
         color: #fff;
       }
-
-      @media (max-width: 520px) {
-        body {
-          padding: 10px;
-        }
-
-        .chat-app {
-          height: calc(100vh - 20px);
-          border-radius: 8px;
-        }
-
-        .message-bubble {
-          max-width: 85%;
-        }
-      }
-
-      @media (max-width: 450px) {
-        .connection-panel {
-          grid-template-columns: 1fr;
-          grid-template-rows: auto auto auto;
-          gap: 8px;
-        }
-
-        .connect-btn {
-          width: 100%;
-          min-width: unset;
-        }
-      }
     </style>
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
   </head>
   <body>
     <div class="chat-app">
@@ -447,16 +332,19 @@
             ? "http://localhost:3000"
             : "https://real-time-chat-m2fg.onrender.com";
 
-        const socket = io(backendURL);
+        socket = io(backendURL);
 
         socket.on("connect", () => {
           connected = true;
-          updateConnectionStatus("Connected", true);
+          document.getElementById("connection-status").textContent =
+            "Connected";
+          document.getElementById("connection-status").className =
+            "status-online";
           socket.emit("init", userId);
           loadChatHistory();
-          enableInput();
+          document.getElementById("messageInput").disabled = false;
+          document.getElementById("sendButton").disabled = false;
 
-          // 🔁 Delay status check slightly (200ms)
           setTimeout(() => {
             socket.emit("check_user_status", toUser);
           }, 200);
@@ -464,8 +352,12 @@
 
         socket.on("disconnect", () => {
           connected = false;
-          updateConnectionStatus("Disconnected", false);
-          disableInput();
+          document.getElementById("connection-status").textContent =
+            "Disconnected";
+          document.getElementById("connection-status").className =
+            "status-offline";
+          document.getElementById("messageInput").disabled = true;
+          document.getElementById("sendButton").disabled = true;
         });
 
         socket.on("receive_message", (msg) => {
@@ -477,7 +369,8 @@
         });
 
         socket.on("update_status", ({ timestamp }) => {
-          updateMessageStatus(timestamp, "delivered");
+          const el = document.getElementById(`status-${timestamp}`);
+          if (el) el.textContent = "✓✓ Delivered";
         });
 
         socket.on("user_status", ({ userId: changedUserId, status }) => {
@@ -499,178 +392,68 @@
         const content = document.getElementById("messageInput").value.trim();
         if (!content) return;
 
-        const message = {
+        const msg = {
           from: userId,
           to: toUser,
           content,
           timestamp: Date.now(),
         };
 
-        displayMessage(message, "sent", "sending");
-        socket.emit("send_message", message, (ack) => {
-          updateMessageStatus(message.timestamp, ack.status);
+        displayMessage(msg, "sent");
+        socket.emit("send_message", msg, (ack) => {
+          const el = document.getElementById(`status-${msg.timestamp}`);
+          if (el)
+            el.textContent =
+              ack.status === "delivered" ? "✓✓ Delivered" : "✓ Sent";
         });
 
         document.getElementById("messageInput").value = "";
-        autoResizeTextarea();
       }
 
-      function displayMessage(msg, type, status = "") {
+      function displayMessage(msg, type) {
         const chatBox = document.getElementById("chatBox");
-
-        // Clear empty state
-        const emptyState = chatBox.querySelector(".empty-state");
-        if (emptyState) {
-          emptyState.remove();
-        }
-
         const messageGroup = document.createElement("div");
         messageGroup.className = `message-group ${type}`;
         messageGroup.id = `msg-${msg.timestamp}`;
-
         const time = new Date(msg.timestamp).toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
         });
-        const statusIcon = getStatusIcon(status);
-        const statusText = getStatusText(status);
-
         messageGroup.innerHTML = `
-                <div class="message-bubble">
-                    ${msg.content}
-                </div>
-                <div class="message-info">
-                    <span class="message-time">${time}</span>
-                    ${
-                      type === "sent"
-                        ? `
-                        <span class="message-status status-${status}" id="status-${msg.timestamp}">
-                            <span class="status-icon">${statusIcon}</span>
-                            <span>${statusText}</span>
-                        </span>
-                    `
-                        : ""
-                    }
-                </div>
-            `;
-
+          <div class="message-bubble">${msg.content}</div>
+          <div class="message-info">
+            <span>${time}</span>
+            ${
+              type === "sent"
+                ? `<span class="message-status" id="status-${msg.timestamp}">Sending...</span>`
+                : ""
+            }
+          </div>
+        `;
         chatBox.appendChild(messageGroup);
         chatBox.scrollTop = chatBox.scrollHeight;
       }
 
-      function getStatusIcon(status) {
-        switch (status) {
-          case "sending":
-            return "○";
-          case "sent":
-            return "✓";
-          case "delivered":
-            return "✓✓";
-          case "seen":
-            return "✓✓";
-          default:
-            return "";
-        }
-      }
-
-      function getStatusText(status) {
-        switch (status) {
-          case "sending":
-            return "Sending";
-          case "sent":
-            return "Sent";
-          case "delivered":
-            return "Delivered";
-          case "seen":
-            return "Seen";
-          default:
-            return "";
-        }
-      }
-
-      function updateMessageStatus(timestamp, status) {
-        const statusEl = document.getElementById(`status-${timestamp}`);
-        if (statusEl) {
-          const statusIcon = getStatusIcon(status);
-          const statusText = getStatusText(status);
-          statusEl.className = `message-status status-${status}`;
-          statusEl.innerHTML = `
-                    <span class="status-icon">${statusIcon}</span>
-                    <span>${statusText}</span>
-                `;
-        }
-      }
-
-      function updateConnectionStatus(status, isConnected) {
-        const statusEl = document.getElementById("connection-status");
-        statusEl.textContent = status;
-        statusEl.className = isConnected ? "status-online" : "status-offline";
-      }
-
-      function updateUserStatus(status) {
-        const userStatusEl = document.getElementById("user-status");
-        userStatusEl.textContent = `${toUser}: ${status}`;
-        userStatusEl.className =
-          status === "online" ? "status-online" : "status-offline";
-      }
-
-      function enableInput() {
-        document.getElementById("messageInput").disabled = false;
-        document.getElementById("sendButton").disabled = false;
-      }
-
-      function disableInput() {
-        document.getElementById("messageInput").disabled = true;
-        document.getElementById("sendButton").disabled = true;
-      }
-
-      function autoResizeTextarea() {
-        const textarea = document.getElementById("messageInput");
-        textarea.style.height = "auto";
-        textarea.style.height = Math.min(textarea.scrollHeight, 120) + "px";
-      }
-
       async function loadChatHistory() {
-        try {
-          const url = `http://localhost:3000/messages?user1=${userId}&user2=${toUser}`;
-          const response = await fetch(url);
-          const messages = await response.json();
+        const url =
+          window.location.hostname === "localhost"
+            ? `http://localhost:3000/messages?user1=${userId}&user2=${toUser}`
+            : `https://real-time-chat-m2fg.onrender.com/messages?user1=${userId}&user2=${toUser}`;
 
-          const chatBox = document.getElementById("chatBox");
-          chatBox.innerHTML = "";
+        const res = await fetch(url);
+        const history = await res.json();
+        const chatBox = document.getElementById("chatBox");
+        chatBox.innerHTML = "";
 
-          if (messages.length === 0) {
-            chatBox.innerHTML =
-              '<div class="empty-state">No messages yet. Start the conversation!</div>';
-            return;
-          }
-
-          messages.forEach((msg) => {
-            displayMessage(
-              msg,
-              msg.from === userId ? "sent" : "received",
-              "delivered"
-            );
-          });
-        } catch (error) {
-          console.error("Failed to load chat history:", error);
+        if (!history.length) {
+          chatBox.innerHTML = `<div class="empty-state">No messages yet. Start the conversation!</div>`;
+          return;
         }
-      }
 
-      // Auto-resize textarea
-      document
-        .getElementById("messageInput")
-        .addEventListener("input", autoResizeTextarea);
-
-      // Enter key to send message
-      document
-        .getElementById("messageInput")
-        .addEventListener("keydown", (e) => {
-          if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault();
-            sendMessage();
-          }
+        history.forEach((msg) => {
+          displayMessage(msg, msg.from === userId ? "sent" : "received");
         });
+      }
     </script>
   </body>
 </html>
