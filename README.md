@@ -81,13 +81,35 @@ Visit `http://localhost:3000` to access the test chat client.
 
 ### Get Chat History
 
-**Endpoint:**  
-`GET /messages?user1=<USER_A>&user2=<USER_B>`
+Fetch the full chronological conversation between two users.
 
-**Example:**  
-`/messages?user1=alice&user2=bob`
+```
+GET /messages?user1=<USER_A>&user2=<USER_B>
+```
 
-**Response:**
+### Description
+
+Retrieves all chat messages exchanged between two specified users. This is a **read-only** endpoint that queries the server's in-memory message store.
+
+### Query Parameters
+
+| Parameter | Type   | Required | Description                             |
+| --------- | ------ | -------- | --------------------------------------- |
+| `user1`   | string |   Yes    | ID of the first user (sender/receiver)  |
+| `user2`   | string |   Yes    | ID of the second user (sender/receiver) |
+
+> The messages are returned regardless of direction (i.e., both `user1 → user2` and `user2 → user1` messages are included).
+
+### Example Request
+
+```
+GET /messages?user1=alice&user2=bob
+```
+
+### Response
+
+Returns a JSON array of message objects:
+
 ```json
 [
   {
@@ -104,6 +126,19 @@ Visit `http://localhost:3000` to access the test chat client.
   }
 ]
 ```
+
+### Timestamp Format
+
+UNIX epoch time in milliseconds.
+
+### Status Codes
+
+| Code | Description                |
+| ---- | -------------------------- |
+| 200  |   Success - Data returned  |
+| 400  |   Missing query parameters |
+| 500  |   Server error             |
+
 
 ---
 
