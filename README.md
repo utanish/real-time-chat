@@ -1,5 +1,5 @@
 
-# Real-Time Chat Backend
+# Real-Time Chat using Socket.io
 
 A minimal real-time chat backend built using **Node.js**, **Express**, and **Socket.IO**, designed for two-user communication with offline message support and REST-based chat history retrieval.
 
