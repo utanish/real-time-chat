@@ -1,4 +1,3 @@
-
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
@@ -15,10 +14,11 @@ const {
 const messagesRoute = require("./routes/messages.js");
 
 const app = express();
+app.use(express.static("public"));
+app.use("/messages", messagesRoute);
+
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
-
-app.use("/messages", messagesRoute);
 
 io.on("connection", (socket) => {
   let currentUser = null;
