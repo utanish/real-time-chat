@@ -1,3 +1,4 @@
+
 # Real-Time Chat Backend
 
 A minimal real-time chat backend built using **Node.js**, **Express**, and **Socket.IO**, designed for two-user communication with offline message support and REST-based chat history retrieval.
@@ -42,6 +43,12 @@ real-time-chat-backend/
 ├── package.json
 └── README.md
 ```
+
+---
+
+## Chat UI Preview
+
+<img width="1064" alt="image" src="https://github.com/user-attachments/assets/af572026-d30e-4bd5-a0b5-ae116e639eee" />
 
 ---
 
@@ -128,6 +135,10 @@ Tests are written using **Jest** and validate:
 - Chat history persistence
 
 ---
+
+## Architecture Diagram
+
+![ChatGPT Image Jun 28, 2025, 02_10_48 AM](https://github.com/user-attachments/assets/978bec90-c9ba-4e27-adff-147bbbb8c54b)
 
 ## Deployment
 
