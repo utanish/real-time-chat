@@ -20,15 +20,20 @@ app.use("/messages", messagesRoute);
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 
+function logAndEmit(msg) {
+  console.log(msg);
+  io.emit("server_log", msg);
+}
+
 io.on("connection", (socket) => {
   let currentUser = null;
-  console.log(`[Socket] Connected: ${socket.id}`);
+  logAndEmit(`[Socket] Connected: ${socket.id}`);
 
   socket.on("init", (userId) => {
     try {
       currentUser = userId;
       registerUser(userId, socket);
-      console.log(`[Init] ${userId} is now online`);
+      logAndEmit(`[Init] ${userId} is now online`);
       deliverBufferedMessages(userId);
       io.emit("user_status", { userId, status: "online" });
     } catch (err) {
@@ -44,11 +49,11 @@ io.on("connection", (socket) => {
 
       if (receiverSocket) {
         receiverSocket.emit("receive_message", msg);
-        console.log(`[Message] ${from} → ${to} | Delivered`);
+        logAndEmit(`[Message] ${from} → ${to} | Delivered`);
         callback({ status: "delivered", timestamp: msg.timestamp });
       } else {
         bufferMessage(to, msg);
-        console.log(`[Message] ${from} → ${to} | Buffered`);
+        logAndEmit(`[Message] ${from} → ${to} | Buffered`);
         callback({ status: "sent", timestamp: msg.timestamp });
       }
     } catch (err) {
@@ -62,7 +67,7 @@ io.on("connection", (socket) => {
       const senderSocket = getOnlineSocket(to);
       if (senderSocket) {
         senderSocket.emit("update_status", { timestamp });
-        console.log(`[Ack] ${to} received message sent at ${timestamp}`);
+        logAndEmit(`[Ack] ${to} received message sent at ${timestamp}`);
       }
     } catch (err) {
       console.error(`[Ack Error] ${err.message}`);
@@ -85,7 +90,7 @@ io.on("connection", (socket) => {
     try {
       if (currentUser) {
         removeUser(currentUser);
-        console.log(`[Socket] Disconnected: ${currentUser}`);
+        logAndEmit(`[Socket] Disconnected: ${currentUser}`);
         io.emit("user_status", { userId: currentUser, status: "offline" });
       }
     } catch (err) {
