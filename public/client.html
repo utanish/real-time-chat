@@ -442,7 +442,12 @@
           }
         }
 
-        socket = io("http://localhost:3000");
+        const backendURL =
+          window.location.hostname === "localhost"
+            ? "http://localhost:3000"
+            : "https://real-time-chat-m2fg.onrender.com";
+
+        const socket = io(backendURL);
 
         socket.on("connect", () => {
           connected = true;
